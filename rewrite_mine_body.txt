@@ -1,0 +1,287 @@
+package com.thisko.qringprint.ui.pages
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.res.stringResource
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalConfiguration
+import com.thisko.qringprint.R
+import com.thisko.qringprint.model.DisplayMode
+import com.thisko.qringprint.model.applyDisplayMode
+import com.thisko.qringprint.model.loadDisplayMode
+import com.thisko.qringprint.model.saveDisplayMode
+import com.thisko.qringprint.model.loadDefaultThickness
+import com.thisko.qringprint.model.loadUsbBaudRate
+import com.thisko.qringprint.model.saveDefaultThickness
+import com.thisko.qringprint.model.saveUsbBaudRate
+import com.thisko.qringprint.ui.motion.pageEnter
+import kotlinx.coroutines.launch
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MinePage(modifier: Modifier = Modifier, onDiagnostic: () -> Unit = {}) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val locale = LocalConfiguration.current.locales[0]
+    val isEnglish = locale.language.equals("en", ignoreCase = true)
+    var displayMode by remember { mutableStateOf(DisplayMode.fromInt(loadDisplayMode(context))) }
+    val status by com.thisko.qringprint.bluetooth.PrinterConnection.status.collectAsState()
+    val queueState by com.thisko.qringprint.bluetooth.PrintQueue.state.collectAsState()
+    var defaultThickness by remember { mutableStateOf(loadDefaultThickness(context)) }
+    var language by remember {
+        mutableStateOf(
+            context.getSharedPreferences("qring_print_settings", android.content.Context.MODE_PRIVATE)
+                .getString("language", "").orEmpty()
+        )
+    }
+    var shutdownMinutes by remember {
+        mutableStateOf(
+            context.getSharedPreferences("qring_print_settings", android.content.Context.MODE_PRIVATE)
+                .getInt("shutdown_minutes", 10)
+        )
+    }
+    var usbBaudRate by remember { mutableStateOf(loadUsbBaudRate(context)) }
+
+    fun applyLanguage(tag: String) {
+        language = tag
+        context.getSharedPreferences("qring_print_settings", android.content.Context.MODE_PRIVATE)
+            .edit().putString("language", tag).apply()
+        runCatching {
+            val cls = Class.forName("androidx.appcompat.app.AppCompatDelegate")
+            val lcls = Class.forName("androidx.core.os.LocaleListCompat")
+            val forLang = lcls.getMethod("forLanguageTags", String::class.java).invoke(null, tag)
+            cls.getMethod("setApplicationLocales", lcls).invoke(null, forLang)
+        }
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .pageEnter(),
+    ) {
+        TopAppBar(
+            title = { Text(stringResource(R.string.tab_mine), fontWeight = FontWeight.SemiBold) },
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+        )
+        Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surface
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(stringResource(R.string.printer_info), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+                    Spacer(Modifier.height(12.dp))
+                    InfoRow(stringResource(R.string.device_name), status.deviceName.ifEmpty { stringResource(R.string.not_connected) })
+                    InfoRow(stringResource(R.string.device_address), status.deviceId.ifEmpty { "—" })
+                    InfoRow(stringResource(R.string.model), status.model.ifEmpty { "—" })
+                    InfoRow(stringResource(R.string.firmware_version), status.firmware.ifEmpty { "—" })
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+            OutlinedButton(
+                onClick = onDiagnostic,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Filled.BugReport, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.open_diagnostic))
+            }
+            Spacer(Modifier.height(16.dp))
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surface
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(stringResource(R.string.task_progress), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        when (queueState) {
+                            com.thisko.qringprint.bluetooth.QueueState.Idle -> stringResource(R.string.idle)
+                            is com.thisko.qringprint.bluetooth.QueueState.Running ->
+                                (queueState as com.thisko.qringprint.bluetooth.QueueState.Running).current.toString() + "/" + (queueState as com.thisko.qringprint.bluetooth.QueueState.Running).total + " · " + (queueState as com.thisko.qringprint.bluetooth.QueueState.Running).currentTitle
+                        },
+                        fontSize = 13.sp,
+                    )
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surface
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(stringResource(R.string.default_density), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    Spacer(Modifier.height(4.dp))
+                    Text(stringResource(R.string.density_hint), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(Modifier.height(8.dp))
+                    Slider(
+                        value = defaultThickness.toFloat(),
+                        onValueChange = {
+                            val value = it.toInt()
+                            defaultThickness = value
+                            saveDefaultThickness(context, value)
+                        },
+                        valueRange = 0f..3f,
+                        steps = 2
+                    )
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surface
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(stringResource(R.string.usb_baud_rate), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    val rates = listOf(9600, 19200, 38400, 57600, 115200, 230400)
+                    rates.forEach { rate ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = usbBaudRate == rate,
+                                onClick = {
+                                    usbBaudRate = rate
+                                    saveUsbBaudRate(context, rate)
+                                }
+                            )
+                            Text("$rate bps · USB serial")
+                        }
+                    }
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surface
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(stringResource(R.string.auto_shutdown), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    Spacer(Modifier.height(4.dp))
+                    Text(stringResource(R.string.minutes, shutdownMinutes), fontSize = 13.sp)
+                    Slider(
+                        value = shutdownMinutes.toFloat(),
+                        onValueChange = {
+                            val value = it.toInt()
+                            shutdownMinutes = value
+                            context.getSharedPreferences("qring_print_settings", android.content.Context.MODE_PRIVATE)
+                                .edit().putInt("shutdown_minutes", value).apply()
+                            if (com.thisko.qringprint.bluetooth.PrinterConnection.isAlive()) {
+                                scope.launch {
+                                    com.thisko.qringprint.bluetooth.PrinterConnection.setShutdownTime(value * 60)
+                                }
+                            }
+                        },
+                        valueRange = 5f..60f,
+                        steps = 10
+                    )
+                    Text(
+                        if (isEnglish) "Sent immediately while connected. Bluetooth name / baud / curve are not in the protocol." else "连接状态下立即下发；蓝牙名称/波特率/速度曲线当前协议未提供设置命令。",
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surface
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(stringResource(R.string.display_mode), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+                    Spacer(Modifier.height(12.dp))
+                    DisplayMode.values().forEach { mode ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = displayMode == mode,
+                                onClick = {
+                                    displayMode = mode
+                                    saveDisplayMode(context, mode)
+                                    applyDisplayMode(mode)
+                                }
+                            )
+                            Text(when (mode) {
+                                DisplayMode.FOLLOW -> stringResource(R.string.follow_system)
+                                DisplayMode.LIGHT -> stringResource(R.string.light)
+                                DisplayMode.DARK -> stringResource(R.string.dark)
+                            }, fontSize = 14.sp)
+                        }
+                    }
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surface
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(stringResource(R.string.language), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    listOf(
+                        "" to stringResource(R.string.follow_system),
+                        "zh-CN" to stringResource(R.string.chinese),
+                        "en" to stringResource(R.string.english),
+                    ).forEach { (tag, label) ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = language == tag,
+                                onClick = { applyLanguage(tag) }
+                            )
+                            Text(label, fontSize = 14.sp)
+                        }
+                    }
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surface
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(stringResource(R.string.about), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    Spacer(Modifier.height(8.dp))
+                    Text(if (isEnglish) "Huanxong Kuaiyin Android" else "浣熊快印 Android 版", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("v4.0 · MIT License", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun InfoRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(label, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+        Text(value, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
+    }
+}

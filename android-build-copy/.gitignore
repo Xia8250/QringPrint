@@ -1,0 +1,27 @@
+# Gradle 缓存与构建产物
+.gradle/
+build/
+local.properties
+captures/
+
+# 签名相关——绝对不能进 git
+*.jks
+*.keystore
+release.keystore
+app/release.keystore
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# 临时输出
+*.apk
+*.aab
+*.ap_
+
+# 切勿提交：本地 gradle.properties 中的 QRINGPRINT_RELEASE_*_PASSWORD 行
+# 如果以后要把 gradle.properties 入库,把下面这段也打开：
+# gradle.properties
+# 现在的策略是：gradle.properties 整体不入库,只提供 gradle.properties.example 作为模板

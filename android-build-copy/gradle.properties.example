@@ -1,0 +1,15 @@
+org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true
+android.useAndroidX=true
+kotlin.code.style=official
+android.nonTransitiveRClass=true
+android.suppressUnsupportedCompileSdk=35
+
+# ===== Release 签名配置 =====
+# 1. 用 keytool 生成你自己的 release keystore:
+#      keytool -genkey -v -keystore app/release.keystore -alias <alias> -keyalg RSA -keysize 2048 -validity 9125
+# 2. 把下面 4 个值填上你自己的 storePass / keyPass / alias
+# 3. gradle.properties 整体在 .gitignore 里,真实值别提交
+QRINGPRINT_RELEASE_STORE_FILE=release.keystore
+QRINGPRINT_RELEASE_STORE_PASSWORD=__REPLACE_WITH_YOUR_STORE_PASSWORD__
+QRINGPRINT_RELEASE_KEY_ALIAS=__REPLACE_WITH_YOUR_KEY_ALIAS__
+QRINGPRINT_RELEASE_KEY_PASSWORD=__REPLACE_WITH_YOUR_KEY_PASSWORD__

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <cache-path name="ocr_cache" path="ocr/" />
+    <files-path name="ocr_files" path="ocr/" />
+    <external-files-path name="updates" path="updates/" />
+</paths>

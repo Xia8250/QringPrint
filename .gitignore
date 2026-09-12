@@ -1,0 +1,79 @@
+/node_modules
+/oh_modules
+/local.properties
+/.idea
+**/build
+/.hvigor
+**/.hvigor
+**/.preview
+**/*.bak
+.cxx
+/.clangd
+/.clang-format
+/.clang-tidy
+**/.test
+/.appanalyzer
+/.claude
+/build-profile.json5
+*.hap
+*.hsp
+*.app
+
+# === Android 子项目（android-build-copy）===
+**/.gradle/
+**/*.keystore
+**/*.jks
+android-build-copy/local.properties
+android-build-copy/gradle.properties
+# APK/AAB 不入库 —— 走独立发版仓库 huanxongkuaiyin-updates
+*.apk
+*.aab
+*.ap_
+
+# === 本地构建缓存与运行时 ===
+# JDK / Gradle 本地副本（解压后非常大，避免入库）
+jdk8/
+jdk21/
+jdk8.zip
+jdk21.zip
+gradle-7.6.4-bin.zip
+gradle-8.10.2-bin.zip
+# Gradle 安装目录
+gradle-home/
+gradle-new/
+gradle7/
+
+# === 构建日志与临时输出 ===
+# 历史构建日志
+build_*.log
+build_apk.log
+build_fix.log
+build_hap.log
+build_kotlin*.log
+build_v*.log
+build-release.log
+build_update_v7.log
+build-release.log
+gradle-error.log
+
+# === 临时调试/补丁工具 ===
+# fixagent 一次性修复工具
+fixagent.jar
+fixagent-classes/
+FixAgent.java
+# 一次性 patch 脚本
+patch_*.py
+rewrite_*.py
+write_*.py
+# 测试/单文件
+test_afunix.java
+# 临时证书文本
+apk_cert.txt
+# 旧版 SHA256 文本（发版流程由 gen_update_json.ps1 重算）
+app-release-*.sha256.txt
+
+# === DevEco / hvigor 衍生 ===
+.hvigor/
+code-linter.json5
+fixagent-manifest.txt
+gen_update_json.ps1.tmp
