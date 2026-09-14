@@ -1,22 +1,23 @@
 # QringPrint
 
-**面向错题小印（Qring / BeePrt BY 系列）58mm 蓝牙热敏打印机的第三方原生 HarmonyOS 客户端**
+**面向错题小印（Qring / BeePrt BY 系列）58mm 蓝牙热敏打印机的第三方 Android 客户端**
 
-QringPrint 使用 ArkTS 与原生 ArkUI 从零开发，无需依赖原厂服务器，可通过经典蓝牙（SPP）直接连接打印机，完成文字、图片、条码和自定义内容的排版、预览与打印。
+QringPrint Android 是基于 https://github.com/Thisko/QrintPrint HarmonyOS 客户端进行二次开发的 Android 应用。项目延续原版的本地打印思路，并针对 Android 平台重新实现界面、蓝牙连接及相关功能，无需依赖原厂服务器即可使用。
 
-![Platform](https://img.shields.io/badge/platform-HarmonyOS%206.1.1%2B-black) ![Language](https://img.shields.io/badge/language-ArkTS-blue) ![Device](https://img.shields.io/badge/device-58mm%20%E7%83%AD%E6%95%8F%E6%89%93%E5%8D%B0%E6%9C%BA-7C5CE6) ![License](https://img.shields.io/badge/license-MIT-green)
+![Platform](https://img.shields.io/badge/platform-Android-3DDC84) ![Language](https://img.shields.io/badge/language-Kotlin-7F52FF) ![Device](https://img.shields.io/badge/device-58mm%20%E7%83%AD%E6%95%8F%E6%89%93%E5%8D%B0%E6%9C%BA-7C5CE6) ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
 
 ## 项目简介
 
-错题小印（Qring / BeePrt BY 系列）是一类适用于错题整理、学习笔记、便签和标签打印的 58mm 蓝牙热敏打印机。由于原厂 App 的部分在线服务已不可用，QringPrint 尝试提供一个可独立运行的 HarmonyOS 第三方客户端，让现有设备能够继续使用。
+错题小印（Qring / BeePrt BY 系列）是一类适用于错题整理、学习笔记、便签和标签打印的 58mm 蓝牙热敏打印机。由于原厂 App 的部分在线服务已不可用，本项目提供一个可独立运行的第三方 Android 客户端，让现有设备能够继续使用。
 
-应用通过经典蓝牙 SPP 通道与打印机直连，在本地将文字、图片、条码及自由排版内容渲染为 384 点宽的单色光栅位图，再按照设备通信协议分包发送。整个打印流程不依赖云端服务，主要功能均在设备本地完成。
+本项目并非原版 HarmonyOS 客户端，而是基于 https://github.com/Thisko/QrintPrint 的功能设计与实现思路进行二次开发的 Android 版本。应用通过经典蓝牙 SPP 通道与打印机直连，在本地处理文字、图片、条码及排版内容，并按照设备通信协议发送打印数据。整个打印流程不依赖云端服务，主要功能均在 Android 设备本地完成。
 
 ### 核心能力
 
-- **原生 HarmonyOS 应用**：使用 ArkTS 和 ArkUI 开发，适配 HarmonyOS 6.1.1 及以上版本。
+- **原生 Android 应用**：使用 Kotlin 开发，针对 Android 平台重新实现界面与功能。
+- **基于原版二次开发**：参考 Thisko/QrintPrint HarmonyOS 客户端的功能设计与打印实现思路。
 - **蓝牙直连打印**：通过经典蓝牙 SPP 连接错题小印系列打印机，无需原厂服务器。
 - **多种内容类型**：支持文字、图片、条码以及自由画布组合排版。
 - **打印前预览**：发送任务前查看实际版面，降低纸张浪费和排版错误。
@@ -31,13 +32,15 @@ QringPrint 使用 ArkTS 与原生 ArkUI 从零开发，无需依赖原厂服务�
 - 临时便签、待办事项及清单打印
 - 二维码、条形码和简单标签打印
 - 旧设备在原厂服务不可用后的继续使用
-- HarmonyOS 蓝牙热敏打印与私有协议研究
+- Android 蓝牙热敏打印与私有协议研究
 
 ## 关于开发
 
-本项目由 Claude 与 DeepSeek 协助进行 Vibe Coding 开发，目前已在 Nova 14 Ultra 上完成基本功能测试。由于可测试的设备和系统环境有限，项目仍可能存在兼容性或稳定性问题，不保证在所有机型及所有错题小印设备上完全可用。
+本项目是在 https://github.com/Thisko/QrintPrint HarmonyOS 客户端基础上进行二次开发的 Android 版本。感谢原作者 Thisko 提供的开源项目及相关实现思路。
 
-如果遇到问题，欢迎提交 Issue，并尽量附上手机型号、HarmonyOS 版本、打印机型号、问题截图和复现步骤。若项目对你有帮助，也欢迎点一个 Star。
+当前项目仍在持续完善中。由于可测试的 Android 设备、系统版本和打印机型号有限，可能存在兼容性或稳定性问题，不保证在所有设备上完全可用。
+
+如果遇到问题，欢迎提交 Issue，并尽量附上手机型号、Android 版本、打印机型号、问题截图和复现步骤。若项目对你有帮助，也欢迎点一个 Star。
 > 目前实现的是 **SPP** 通道,这个机器是 **SPP＋BLE** 双模的。BLE 应该也能控制,后续可以开发做小程序版。
 
 ## 功能
